@@ -1,10 +1,4 @@
 {
-    "version": 2,
-    "functions": {
-      "api/hello.js": {
-        "runtime": "nodejs16.x"
-      }
-    },
     "crons": [
       {
         "path": "/api/hello",
