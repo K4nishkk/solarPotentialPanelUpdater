@@ -1,7 +1,5 @@
-const Home = async () => {
+export default function Home() {
   return (
-      <div>Solar Potential Panel Updater</div>
+    <div>Solar Potential Panel Updater</div>
   );
-};
-
-export default Home;
+}
