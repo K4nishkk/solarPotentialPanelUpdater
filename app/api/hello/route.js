@@ -18,6 +18,7 @@ export async function GET() {
     });
 
     // Send the scraped data back as JSON
+    console.log({ titles: productTitles })
     return new Response(JSON.stringify({ titles: productTitles }), {
       headers: { 'Content-Type': 'application/json' },
     });
