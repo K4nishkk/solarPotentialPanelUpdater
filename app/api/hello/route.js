@@ -1,6 +1,6 @@
-// app/api/scrape/route.js
 import axios from 'axios';
-import * as cheerio from 'cheerio'; // Correct import
+import * as cheerio from 'cheerio';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const url = 'https://www.loomsolar.com/collections/solar-panels';

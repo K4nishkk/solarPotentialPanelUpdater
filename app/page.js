@@ -8,7 +8,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch data from the API route on your server
-    axios.get('/api/scrape')
+    axios.get('/api/hello')
       .then((response) => {
         setTitles(response.data.titles);
       })
