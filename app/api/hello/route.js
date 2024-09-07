@@ -4,6 +4,8 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import { MongoClient } from 'mongodb';
 import ParserFactory from '@/factory/parserFactory';
+
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 function errorResponse(error) {
