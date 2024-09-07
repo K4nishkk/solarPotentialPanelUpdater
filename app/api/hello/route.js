@@ -15,6 +15,8 @@ function errorResponse(error) {
 }
 
 export async function GET() {
+  console.log("Solar Panels database updation has started");
+
   const uri = process.env.CONNECTION_STRING;
   const client = new MongoClient(uri);
 
@@ -25,6 +27,7 @@ export async function GET() {
   const productLinks = [];
   const productDetails = [];
 
+  console.log("Getting product page links from collections page...")
   for (const collectionPage of productsCollectionPages) {
     try {
       const response = await axios.get(collectionPage.url);
@@ -36,6 +39,7 @@ export async function GET() {
     }
   }
 
+  console.log("Getting product details...")
   for (const link of productLinks) {
     try {
       const response = await axios.get(link.url);
@@ -45,6 +49,7 @@ export async function GET() {
     }
   }
 
+  console.log("Updating database")
   try {
     await client.connect();
     const database = client.db('ProductDetailsDB');
@@ -59,6 +64,7 @@ export async function GET() {
   } finally {
     await client.close();
   }
+  console.log("Database updation finished")
 
   return new Response(JSON.stringify({ productDetails }), {
     headers: { 'Content-Type': 'application/json' },
