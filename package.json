@@ -12,6 +12,7 @@
     "@google/generative-ai": "^0.17.1",
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
+    "js-yaml": "^4.1.0",
     "next": "14.2.7",
     "react": "^18",
     "react-dom": "^18"

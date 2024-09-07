@@ -1,0 +1,28 @@
+productsCollectionPages:
+  - site: "loomsolar"
+    url: 'https://www.loomsolar.com/collections/solar-panels'
+    areLinksRelative: true
+    baseURL: 'https://www.loomsolar.com'
+  - site: "waaree"
+    url: 'https://shop.waaree.com/solar-module/'
+    areLinksRelative: false
+  - site: "upsinverter"
+    url: 'https://www.upsinverter.com/product-category/solar-solutions/solar-panel/'
+    areLinksRelative: false
+
+selectors:
+  loomsolar:
+    text: '.rte.text--pull'
+    img: '.product-gallery__image'
+    price: '.price.price--highlight'
+    collectionPage: '.product-item__title'
+  waaree:
+    text: '.productView-info'
+    img: '.productView-image--default'
+    price: '.productView-price .price.price--withTax'
+    collectionPage: 'card-title a'
+  upsinverter:
+    text: '.woocommerce-product-details__short-description'
+    img: '.wp-post-image'
+    price: '.woocommerce-Price-amount.amount'
+    collectionPage: '.woocommerce-LoopProduct-link'
