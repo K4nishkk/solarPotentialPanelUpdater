@@ -4,5 +4,11 @@
       "path": "/api/hello",
       "schedule": "0 1 * * *"
     }
+  ], 
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
   ]
 }

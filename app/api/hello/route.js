@@ -1,4 +1,5 @@
 import axios from 'axios';
+import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { MongoClient } from 'mongodb';
@@ -17,7 +18,8 @@ export async function GET() {
   const uri = process.env.CONNECTION_STRING;
   const client = new MongoClient(uri);
 
-  const config = yaml.load(fs.readFileSync('./config.yaml', 'utf8'));
+  const configPath = path.join(process.cwd(), 'config.yaml');
+  const config = yaml.load(fs.readFileSync(configPath, 'utf8'));
   const { productsCollectionPages, selectors } = config;
 
   const productLinks = [];
