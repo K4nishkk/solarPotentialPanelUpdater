@@ -1,8 +1,7 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import { MongoClient } from 'mongodb';
 import ParserFactory from '@/factory/parserFactory';
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +14,9 @@ function errorResponse(error) {
 }
 
 export async function GET() {
+  const uri = process.env.CONNECTION_STRING;
+  const client = new MongoClient(uri);
+
   const config = yaml.load(fs.readFileSync('./config.yaml', 'utf8'));
   const { productsCollectionPages, selectors } = config;
 
@@ -36,16 +38,24 @@ export async function GET() {
     try {
       const response = await axios.get(link.url);
       productDetails.push(ParserFactory.extractProductDetails(response.data, link, selectors))
-      // const genAI = new GoogleGenerativeAI("AIzaSyAtw3N_dAJo3_zKrz7X42aaN1krTRRkxbA");
-      // const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  
-      // const prompt = "Analyse this text an write it in structured format" + text;
-  
-      // const result = await model.generateContent(prompt);
-      // console.log(result.response.text());
     } catch (error) {
       return errorResponse(error)
     }
+  }
+
+  try {
+    await client.connect();
+    const database = client.db('ProductDetailsDB');
+    const collection = database.collection('ProductDetails');
+    await collection.deleteMany({});
+    await collection.insertOne({ 
+      productDetails: productDetails,
+      lastUpdated: new Date().toLocaleString()
+    });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
   }
 
   return new Response(JSON.stringify({ productDetails }), {

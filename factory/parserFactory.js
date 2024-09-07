@@ -24,6 +24,6 @@ export default class ParserFactory {
         const img = (link.site === "loomsolar") ? imgSelector.attr('data-src').replace("{width}", "600") : imgSelector.attr('src')
         const price = $(selectors[link.site].price).first().text().trim();
 
-        return ({ text: text, img: img, price: price });
+        return ({ text: text, img: img, price: price, link: link.url });
     }
 }
