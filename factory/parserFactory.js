@@ -1,5 +1,24 @@
 import * as cheerio from 'cheerio';
-// import { GoogleGenerativeAI } from '@google/generative-ai';
+import logger from '@/util/logger';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const apiKeys = [
+    process.env.GEMINI_API_KEY1,
+    process.env.GEMINI_API_KEY2,
+    process.env.GEMINI_API_KEY3,
+    process.env.GEMINI_API_KEY4,
+    process.env.GEMINI_API_KEY5,
+    process.env.GEMINI_API_KEY6
+]
+
+let currentKeyIndex = 0;
+
+// Get the next API key in the list (rotating)
+function getNextApiKey() {
+    const apiKey = apiKeys[currentKeyIndex];
+    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length; // Rotate to next key
+    return apiKey;
+}
 
 export default class ParserFactory {
     static extractProductLinks(responseData, collectionPage, selectors) {
@@ -19,20 +38,40 @@ export default class ParserFactory {
 
     static async extractProductDetails(responseData, link, selectors) {
         const $ = cheerio.load(responseData);
-        const imgSelector = $(selectors[link.site].img)
+        const imgSelector = $(selectors[link.site].img);
 
         const text = $(selectors[link.site].text).text().trim().replace(/\s+/g, ' ');
-        const img = (link.site === "loomsolar") ? imgSelector.attr('data-src').replace("{width}", "600") : imgSelector.attr('src')
+        const img = (link.site === "loomsolar") ? imgSelector.attr('data-src').replace("{width}", "600") : imgSelector.attr('src');
         const price = $(selectors[link.site].price).first().text().trim();
+    
+        const prompt = "return a unformatted json object string containing powerOutput, Efficiency, Durability/Warranty, Dimensions, miscellanous in one sentence from this " + text;
+    
+        let retries = apiKeys.length;
+    
+        while (retries > 0) {
+          const apiKey = getNextApiKey();
+          try {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+            const result = await model.generateContent(prompt);
 
-        // const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-        // const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const parsedText = JSON.parse(result.response.candidates[0].content.parts[0].text.trim().replace(/```json\n|```|\u003E /g, ''));
+            return { text: parsedText, img: img, price: price, link: link.url };
+          }
+          catch (error) {
+            logger.error(`Error with API key ${apiKey}: ${error.message}`);
+            if (error.response && error.response.status === 429) {
+              logger.error(`Rate limit exceeded for API key: ${apiKey}, switching to next key...`);
+            }
+            else {
+              throw new Error(`Failed to extract details with API key ${apiKey}: ${error.message}`);
+            }
+          }
+    
+          retries--;
+        }
 
-        // const prompt = "Write a story about a magic backpack.";
-
-        // const result = await model.generateContent(prompt);
-        // console.log(result.response.text());
-
-        return ({ text: text, img: img, price: price, link: link.url });
-    }
+        throw new Error('All API keys exhausted or failed.');
+      }
 }
