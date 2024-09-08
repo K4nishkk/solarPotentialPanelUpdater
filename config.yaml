@@ -17,12 +17,12 @@ selectors:
     price: '.price.price--highlight'
     collectionPage: '.product-item__title'
   waaree:
-    text: '.productView-info'
+    text: '.productView-title, .p-warranty, .productView-info, table tbody tr td'
     img: '.productView-image--default'
     price: '.productView-price .price.price--withTax'
-    collectionPage: 'card-title a'
+    collectionPage: '.card-title a'
   upsinverter:
-    text: '.woocommerce-product-details__short-description'
+    text: '.woocommerce-product-details__short-description, .woocommerce-Tabs-panel--description'
     img: '.wp-post-image'
     price: '.woocommerce-Price-amount.amount'
     collectionPage: '.woocommerce-LoopProduct-link'

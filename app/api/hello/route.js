@@ -2,16 +2,17 @@ import axios from 'axios';
 import path from 'path';
 import { promises as fs } from 'fs';
 import yaml from 'js-yaml';
+import pLimit from 'p-limit';
 import { MongoClient } from 'mongodb';
 import ParserFactory from '@/factory/parserFactory';
-import pLimit from 'p-limit';
 import logger from '@/util/logger';
+import Constant from '@/constant';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 async function fetchProductLinks(productsCollectionPages, selectors) {
-  const limit = pLimit(5);
+  const limit = pLimit(Constant.MAX_CONCURRENT_REQUESTS_NUM);
   const requests = productsCollectionPages.map((collectionPage) =>
     limit(() => 
       axios.get(collectionPage.url)
@@ -28,7 +29,7 @@ async function fetchProductLinks(productsCollectionPages, selectors) {
 }
 
 async function fetchProductDetails(productLinks, selectors) {
-  const limit = pLimit(5);
+  const limit = pLimit(Constant.MAX_CONCURRENT_REQUESTS_NUM);
   const requests = productLinks.map((link) =>
     limit(() =>
       axios.get(link.url)

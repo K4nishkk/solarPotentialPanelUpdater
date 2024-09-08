@@ -13,10 +13,9 @@ const apiKeys = [
 
 let currentKeyIndex = 0;
 
-// Get the next API key in the list (rotating)
 function getNextApiKey() {
     const apiKey = apiKeys[currentKeyIndex];
-    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length; // Rotate to next key
+    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
     return apiKey;
 }
 
@@ -40,11 +39,11 @@ export default class ParserFactory {
         const $ = cheerio.load(responseData);
         const imgSelector = $(selectors[link.site].img);
 
-        const text = $(selectors[link.site].text).text().trim().replace(/\s+/g, ' ');
+        const rawText = $(selectors[link.site].text).text().trim().replace(/\s+/g, ' ');
         const img = (link.site === "loomsolar") ? imgSelector.attr('data-src').replace("{width}", "600") : imgSelector.attr('src');
         const price = $(selectors[link.site].price).first().text().trim();
     
-        const prompt = "return a unformatted json object string containing powerOutput, Efficiency, Durability/Warranty, Dimensions, miscellanous in one sentence from this " + text;
+        const prompt = "return a unformatted json object string containing powerOutput, Efficiency, Durability/Warranty, Dimensions, miscellanous in one sentence from this " + rawText;
     
         let retries = apiKeys.length;
     
@@ -60,12 +59,12 @@ export default class ParserFactory {
             return { text: parsedText, img: img, price: price, link: link.url };
           }
           catch (error) {
-            logger.error(`Error with API key ${apiKey}: ${error.message}`);
+            logger.error(`Error with API key ${currentKeyIndex}: ${error.message}`);
             if (error.response && error.response.status === 429) {
-              logger.error(`Rate limit exceeded for API key: ${apiKey}, switching to next key...`);
+              logger.error(`Rate limit exceeded for API key: ${currentKeyIndex}, switching to next key...`);
             }
             else {
-              throw new Error(`Failed to extract details with API key ${apiKey}: ${error.message}`);
+              throw new Error(`Failed to extract details with API key ${currentKeyIndex}: ${error.message}`);
             }
           }
     
