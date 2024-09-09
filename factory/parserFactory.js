@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import logger from '@/util/logger';
+import Constant from '@/constant';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKeys = [
@@ -43,9 +44,14 @@ export default class ParserFactory {
         const img = (link.site === "loomsolar") ? imgSelector.attr('data-src').replace("{width}", "600") : imgSelector.attr('src');
         const price = $(selectors[link.site].price).first().text().trim();
     
-        const prompt = "return a unformatted json object string containing powerOutput, Efficiency, Durability/Warranty, Dimensions, miscellanous in one sentence from this " + rawText;
+        const prompt = `
+          "${rawText}"
+          Generate an array of two pure JSON objects with no formatting seperated by comma:
+          1. First: powerOutput, efficiency, durability/warranty, dimensions, and one miscellaneous sentence.
+          2. Second: all information as key-value pairs.
+        `;
     
-        let retries = apiKeys.length;
+        let retries = Constant.MAX_REQUEST_RETRIES_COUNT;
     
         while (retries > 0) {
           const apiKey = getNextApiKey();
@@ -55,13 +61,17 @@ export default class ParserFactory {
     
             const result = await model.generateContent(prompt);
 
-            const parsedText = JSON.parse(result.response.candidates[0].content.parts[0].text.trim().replace(/```json\n|```|\u003E /g, ''));
-            return { text: parsedText, img: img, price: price, link: link.url };
+            const parsedText = result.response.candidates[0].content.parts[0].text.replace(/```json\n|```|\u003E /g, '').trim();
+            const jsonText = JSON.parse((parsedText[0] === "[") ? parsedText : "[" + parsedText + "]");
+            return { text: jsonText, img: img, price: price, link: link.url };
           }
           catch (error) {
             logger.error(`Error with API key ${currentKeyIndex}: ${error.message}`);
             if (error.response && error.response.status === 429) {
               logger.error(`Rate limit exceeded for API key: ${currentKeyIndex}, switching to next key...`);
+            }
+            else if (error.response && error.response.status === 503) {
+              logger.error(`Service unavailable for API key: ${currentKeyIndex}, switching to next key...`)
             }
             else {
               throw new Error(`Failed to extract details with API key ${currentKeyIndex}: ${error.message}`);
