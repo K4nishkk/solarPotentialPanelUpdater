@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/hello",
+      "path": "/api/solarPanels",
       "schedule": "0 1 * * *"
     }
   ]
