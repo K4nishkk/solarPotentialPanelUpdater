@@ -3,6 +3,7 @@ import pLimit from 'p-limit';
 import path from 'path';
 import yaml from 'js-yaml';
 import { promises as fs } from 'fs';
+import logger from '@/util/logger';
 import ParserFactory from '@/factory/parserFactory';
 import Constant from '@/constant';
 
